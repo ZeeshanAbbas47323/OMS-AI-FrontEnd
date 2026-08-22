@@ -1,0 +1,402 @@
+.handoff-admin {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.handoff-admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.handoff-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.handoff-admin-header h1 { font-size: 22px; margin: 0; }
+.back-link {
+  color: var(--text-secondary, #666);
+  text-decoration: none;
+  font-size: 14px;
+}
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* Stats */
+.handoff-stats-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.handoff-stat {
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 10px;
+  padding: 12px 20px;
+  text-align: center;
+  flex: 1;
+  min-width: 100px;
+}
+.handoff-stat.learned {
+  border-color: #6ee7b7;
+  background: #ecfdf5;
+}
+.handoff-stat-value {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary, #1a1a1a);
+}
+.handoff-stat-label {
+  font-size: 11px;
+  color: var(--text-secondary, #666);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Tabs */
+.handoff-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 2px solid var(--border, #e0e0e0);
+}
+.handoff-tab {
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary, #666);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.handoff-tab.active {
+  color: #6366f1;
+  border-bottom-color: #6366f1;
+}
+.tab-badge {
+  background: #ef4444;
+  color: white;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.tab-count {
+  background: #e5e7eb;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+/* Filters */
+.handoff-filters {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.filter-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 20px;
+  background: var(--bg-card, #fff);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+}
+.filter-btn.active {
+  background: #6366f1;
+  color: white;
+  border-color: #6366f1;
+}
+
+/* Handoff List */
+.handoff-list { display: flex; flex-direction: column; gap: 8px; }
+.handoff-empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary, #666);
+}
+
+.handoff-item {
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.handoff-item:hover { border-color: #6366f1; }
+.handoff-item.selected { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.2); }
+.handoff-item.pending { border-left: 4px solid #f59e0b; }
+.handoff-item.assigned { border-left: 4px solid #3b82f6; }
+.handoff-item.resolved { border-left: 4px solid #10b981; opacity: 0.8; }
+
+.handoff-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.handoff-item-id {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+}
+.handoff-status-badge {
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.handoff-status-badge.pending { background: #fef3c7; color: #92400e; }
+.handoff-status-badge.assigned { background: #dbeafe; color: #1e40af; }
+.handoff-status-badge.resolved { background: #d1fae5; color: #065f46; }
+
+.handoff-item-query {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--text-primary, #1a1a1a);
+}
+.handoff-item-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+}
+.handoff-item-reply {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #166534;
+}
+.auto-learned-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  background: #6ee7b7;
+  color: #064e3b;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Reply Panel */
+.handoff-reply-panel {
+  margin-top: 16px;
+  padding: 18px;
+  background: var(--bg-card, #fff);
+  border: 2px solid #6366f1;
+  border-radius: 12px;
+}
+.handoff-reply-panel h3 { margin: 0 0 10px; font-size: 16px; }
+.handoff-reply-query {
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+.handoff-context {
+  padding: 10px 14px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.context-msg { padding: 4px 0; }
+.context-msg.user { color: #1e40af; }
+.context-msg.agent { color: #166534; }
+.context-role { font-weight: 600; text-transform: capitalize; }
+
+.handoff-reply-form { display: flex; flex-direction: column; gap: 10px; }
+.handoff-agent-name {
+  padding: 8px 12px;
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  font-size: 14px;
+  width: 250px;
+}
+.handoff-reply-input {
+  padding: 10px 14px;
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  font-size: 14px;
+  resize: vertical;
+  font-family: inherit;
+}
+.handoff-reply-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.auto-learn-hint {
+  font-size: 12px;
+  color: #059669;
+  font-style: italic;
+}
+.handoff-resolve-btn {
+  padding: 10px 24px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.handoff-resolve-btn:hover { background: #059669; }
+.handoff-resolve-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Learned Responses */
+.learned-header-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+.add-learned-btn {
+  padding: 8px 18px;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.add-learned-form {
+  padding: 16px;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 10px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.add-learned-form input,
+.add-learned-form textarea {
+  padding: 8px 12px;
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+}
+.add-learned-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.add-learned-actions select {
+  padding: 6px 10px;
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 6px;
+}
+.add-learned-actions button {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  background: #10b981;
+  color: white;
+}
+.add-learned-actions .cancel-btn { background: #9ca3af; }
+
+.learned-list { display: flex; flex-direction: column; gap: 8px; }
+.learned-item {
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.learned-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.learned-category {
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.learned-category.human_handoff { background: #fef3c7; color: #92400e; }
+.learned-category.manual { background: #dbeafe; color: #1e40af; }
+.learned-category.general { background: #e5e7eb; color: #374151; }
+.learned-category.policy { background: #ede9fe; color: #5b21b6; }
+.learned-category.product { background: #fce7f3; color: #9d174d; }
+.learned-category.shipping { background: #d1fae5; color: #065f46; }
+.learned-uses {
+  font-size: 11px;
+  color: var(--text-secondary, #666);
+  margin-left: auto;
+}
+.learned-delete {
+  padding: 2px 10px;
+  background: none;
+  border: 1px solid #ef4444;
+  border-radius: 6px;
+  color: #ef4444;
+  font-size: 11px;
+  cursor: pointer;
+}
+.learned-question {
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: var(--text-primary, #1a1a1a);
+}
+.learned-answer {
+  font-size: 13px;
+  color: var(--text-secondary, #444);
+  padding: 6px 10px;
+  background: #f8fafc;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+.learned-meta {
+  font-size: 11px;
+  color: var(--text-secondary, #999);
+}
+
+/* Dark theme */
+[data-theme="dark"] .handoff-stat { background: #1e1e2e; border-color: #333; }
+[data-theme="dark"] .handoff-stat.learned { background: #064e3b; border-color: #059669; }
+[data-theme="dark"] .handoff-item { background: #1e1e2e; border-color: #333; }
+[data-theme="dark"] .handoff-item.resolved { opacity: 0.7; }
+[data-theme="dark"] .handoff-item-reply { background: #064e3b; color: #6ee7b7; }
+[data-theme="dark"] .handoff-reply-panel { background: #1e1e2e; }
+[data-theme="dark"] .handoff-reply-query { background: #2a2a3e; }
+[data-theme="dark"] .handoff-context { background: #2a2a3e; }
+[data-theme="dark"] .learned-item { background: #1e1e2e; border-color: #333; }
+[data-theme="dark"] .learned-answer { background: #2a2a3e; color: #ccc; }
+[data-theme="dark"] .add-learned-form { background: #1e1e2e; border-color: #333; }
+
+@media (max-width: 768px) {
+  .handoff-admin { padding: 12px; }
+  .handoff-stats-bar { flex-wrap: wrap; }
+  .handoff-stat { min-width: 80px; padding: 8px 12px; }
+}
