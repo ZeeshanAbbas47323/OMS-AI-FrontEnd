@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTheme } from '../context/ThemeContext'
 import './AdminPanel.css'
+import { API_BASE } from '../config'
 
-const API = 'http://localhost:8001'
+const API = API_BASE
 
 export default function AdminPanel() {
   const { theme, toggleTheme } = useTheme()
@@ -71,6 +72,7 @@ export default function AdminPanel() {
         </div>
         <div className="admin-header-actions">
           <a href="/agents" className="admin-nav-btn">🤖 Agents</a>
+          <a href="/tickets" className="admin-nav-btn">🎫 Tickets</a>
           <a href="/admin/knowledge" className="admin-nav-btn">📚 Knowledge</a>
           <a href="/dashboard" className="admin-nav-btn">📊 Dashboard</a>
           <button className="admin-theme-btn" onClick={toggleTheme}>

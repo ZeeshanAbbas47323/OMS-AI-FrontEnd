@@ -89,15 +89,16 @@ export function downloadPDF(data, intent) {
   }
 
   if (intent === 'analytics_profit') {
-    y = addTitle(doc, 'Profit Report', y)
-    y = addLine(doc, `Total Revenue: PKR ${(data.total_revenue || 0).toLocaleString()}`, y)
-    y = addLine(doc, `Total Profit: PKR ${(data.total_profit || 0).toLocaleString()}`, y)
-    y = addLine(doc, `Profit Margin: ${data.profit_margin || 0}%`, y)
+    y = addTitle(doc, 'Delivered Order Margin', y)
+    for (const note of data.data_limits || []) y = addLine(doc, note, y)
+    y = addLine(doc, `Delivered order value: ${data.total_revenue == null ? 'Unavailable' : 'PKR '+data.total_revenue.toLocaleString()}`, y)
+    y = addLine(doc, `Order margin: ${data.total_profit == null ? 'Unavailable' : 'PKR '+data.total_profit.toLocaleString()}`, y)
+    y = addLine(doc, `Margin: ${data.profit_margin == null ? 'Unavailable' : data.profit_margin+'%'}`, y)
     y += 6
     if (data.monthly_breakdown) {
       y = addTitle(doc, 'Monthly Breakdown', y)
       y = addTable(doc,
-        ['Month', 'Revenue', 'Cost', 'Shipping', 'Profit', 'Orders'],
+        ['Creation month', 'Order value', 'Cost', 'Shipping', 'Order margin', 'Orders'],
         Object.entries(data.monthly_breakdown).map(([m, d]) => [
           m,
           `PKR ${d.revenue.toLocaleString()}`,

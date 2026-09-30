@@ -225,6 +225,28 @@ export default function AgentDashboard() {
         <span className="orio-hero-arrow">→</span>
       </Link>
 
+      <Link to="/agents/sales-agent" className="orio-hero-card">
+        <div className="orio-hero-left">
+          <span className="orio-hero-icon">✨</span>
+          <div>
+            <h2 className="orio-hero-title">Sales Agent</h2>
+            <p className="orio-hero-desc">Manage leads, recommend plans, and draft quotes — for prospects, not existing orders.</p>
+          </div>
+        </div>
+        <span className="orio-hero-arrow">→</span>
+      </Link>
+
+      <Link to="/tickets" className="orio-hero-card">
+        <div className="orio-hero-left">
+          <span className="orio-hero-icon">🎫</span>
+          <div>
+            <h2 className="orio-hero-title">Tickets</h2>
+            <p className="orio-hero-desc">Customer requests from WhatsApp waiting on your review — resolve or reject, with a reason.</p>
+          </div>
+        </div>
+        <span className="orio-hero-arrow">→</span>
+      </Link>
+
       <div className="agent-grid">
         {filtered.map(agent => (
           <div key={agent.id} className={`agent-card ${agent.status}`}>

@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTheme } from '../context/ThemeContext'
 import './KnowledgeManager.css'
+import { API_BASE } from '../config'
 
-const API = 'http://localhost:8001'
+const API = API_BASE
 
 export default function KnowledgeManager() {
   const { theme, toggleTheme } = useTheme()

@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import './TeamManager.css'
+import { API_BASE } from '../config'
+import { useAuth } from '../context/AuthContext'
 
-const API = 'http://localhost:8001'
+const API = API_BASE
 
 const AVATAR_OPTIONS = [
   '👨‍💼', '👩‍💼', '👨‍💻', '👩‍💻', '👨‍🔧', '👩‍🔧', '👨‍🏫', '👩‍🏫',
@@ -14,6 +16,8 @@ const GENDER_OPTIONS = ['male', 'female', 'other']
 const ICON_OPTIONS = ['📦', '🎧', '💼', '💰', '🏢', '🔧', '📊', '🚚', '🛒', '📱']
 
 function TeamManager() {
+  const { account } = useAuth()
+  const canManage = account?.role === 'supervisor'
   const [departments, setDepartments] = useState([])
   const [agents, setAgents] = useState([])
   const [selectedDept, setSelectedDept] = useState(null)
@@ -152,8 +156,8 @@ function TeamManager() {
           <p className="tm-subtitle">Manage departments, agents, and assignments</p>
         </div>
         <div className="tm-header-actions">
-          <button className="tm-btn tm-btn-secondary" onClick={() => openDeptModal()}>+ Department</button>
-          <button className="tm-btn tm-btn-primary" onClick={() => openAgentModal()}>+ Agent</button>
+          {canManage && <button className="tm-btn tm-btn-secondary" onClick={() => openDeptModal()}>+ Department</button>}
+          {canManage && <button className="tm-btn tm-btn-primary" onClick={() => openAgentModal()}>+ Agent</button>}
         </div>
       </div>
 
@@ -187,8 +191,8 @@ function TeamManager() {
                 <p>{dept.description}</p>
               </div>
               <div className="tm-dept-actions">
-                <button className="tm-icon-btn" onClick={() => openDeptModal(dept)} title="Edit">✏️</button>
-                <button className="tm-icon-btn" onClick={() => deleteDept(dept.id)} title="Delete">🗑️</button>
+                {canManage && <button className="tm-icon-btn" onClick={() => openDeptModal(dept)} title="Edit">✏️</button>}
+                {canManage && <button className="tm-icon-btn" onClick={() => deleteDept(dept.id)} title="Delete">🗑️</button>}
               </div>
             </div>
             <div className="tm-dept-meta">
@@ -222,7 +226,7 @@ function TeamManager() {
                 <span className="tm-agent-dept">{agent.department_name}</span>
               </div>
               <span className={`tm-status-dot ${agent.status === 'active' ? 'tm-status-active' : 'tm-status-offline'}`}
-                title={agent.status} onClick={() => toggleAgentStatus(agent)} />
+                title={agent.status} onClick={canManage ? () => toggleAgentStatus(agent) : undefined} />
             </div>
 
             <p className="tm-agent-persona">{agent.persona || 'No persona set'}</p>
@@ -242,8 +246,8 @@ function TeamManager() {
                 {agent.customer_count || 0} customers
               </span>
               <div className="tm-agent-actions">
-                <button className="tm-icon-btn" onClick={() => openAgentModal(agent)} title="Edit">✏️</button>
-                <button className="tm-icon-btn" onClick={() => deleteAgent(agent.id)} title="Delete">🗑️</button>
+                {canManage && <button className="tm-icon-btn" onClick={() => openAgentModal(agent)} title="Edit">✏️</button>}
+                {canManage && <button className="tm-icon-btn" onClick={() => deleteAgent(agent.id)} title="Delete">🗑️</button>}
               </div>
             </div>
           </div>
@@ -255,7 +259,7 @@ function TeamManager() {
       </div>
 
       {/* Department Modal */}
-      {showDeptModal && (
+      {canManage && showDeptModal && (
         <div className="tm-modal-overlay" onClick={() => setShowDeptModal(false)}>
           <div className="tm-modal" onClick={e => e.stopPropagation()}>
             <h2>{editingDept ? 'Edit Department' : 'New Department'}</h2>
@@ -304,7 +308,7 @@ function TeamManager() {
       )}
 
       {/* Agent Modal */}
-      {showAgentModal && (
+      {canManage && showAgentModal && (
         <div className="tm-modal-overlay" onClick={() => setShowAgentModal(false)}>
           <div className="tm-modal tm-modal-wide" onClick={e => e.stopPropagation()}>
             <h2>{editingAgent ? 'Edit Agent' : 'New Agent'}</h2>

@@ -2,11 +2,15 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 import './HandoffAdmin.css'
+import { API_BASE } from '../config'
+import { useAuth } from '../context/AuthContext'
 
-const API = 'http://localhost:8001'
+const API = API_BASE
 
 export default function HandoffAdmin() {
   const { theme, toggleTheme } = useTheme()
+  const { account } = useAuth()
+  const canManageKnowledge = account?.role === 'supervisor'
   const [tab, setTab] = useState('handoffs')
   const [handoffs, setHandoffs] = useState([])
   const [learned, setLearned] = useState([])
@@ -23,9 +27,11 @@ export default function HandoffAdmin() {
   useEffect(() => {
     fetchHandoffs()
     fetchStats()
-    fetchLearned()
-    fetchLearnedStats()
-  }, [])
+    if (canManageKnowledge) {
+      fetchLearned()
+      fetchLearnedStats()
+    }
+  }, [canManageKnowledge])
 
   const fetchHandoffs = async () => {
     try {
@@ -113,7 +119,7 @@ export default function HandoffAdmin() {
       <div className="handoff-admin-header">
         <div className="handoff-header-left">
           <Link to="/agents" className="back-link">← Agents</Link>
-          <h1>🙋 Human Handoff & Auto-Learning</h1>
+          <h1>🙋 Human Handoff</h1>
         </div>
         <button className="theme-toggle" onClick={toggleTheme}>
           {theme === 'light' ? '🌙' : '☀️'}
@@ -161,9 +167,9 @@ export default function HandoffAdmin() {
         <button className={`handoff-tab ${tab === 'handoffs' ? 'active' : ''}`} onClick={() => setTab('handoffs')}>
           Handoff Queue {stats?.pending > 0 && <span className="tab-badge">{stats.pending}</span>}
         </button>
-        <button className={`handoff-tab ${tab === 'learned' ? 'active' : ''}`} onClick={() => setTab('learned')}>
+        {canManageKnowledge && <button className={`handoff-tab ${tab === 'learned' ? 'active' : ''}`} onClick={() => setTab('learned')}>
           Learned Responses {learnedStats && <span className="tab-count">{learnedStats.total_learned}</span>}
-        </button>
+        </button>}
       </div>
 
       {/* Handoff Queue Tab */}
@@ -234,17 +240,17 @@ export default function HandoffAdmin() {
                   className="handoff-reply-input"
                   value={replyText}
                   onChange={e => setReplyText(e.target.value)}
-                  placeholder="Type your reply... (this will auto-learn into AI knowledge)"
+                  placeholder="Type your reply to this conversation..."
                   rows={4}
                 />
                 <div className="handoff-reply-actions">
-                  <span className="auto-learn-hint">This reply will be auto-learned by AI</span>
+                  <span className="auto-learn-hint">This reply stays private to this account and conversation.</span>
                   <button
                     className="handoff-resolve-btn"
                     onClick={resolveHandoff}
                     disabled={loading || !replyText.trim()}
                   >
-                    {loading ? 'Resolving...' : 'Resolve & Auto-Learn'}
+                    {loading ? 'Resolving...' : 'Send reply & resolve'}
                   </button>
                 </div>
               </div>
@@ -254,7 +260,7 @@ export default function HandoffAdmin() {
       )}
 
       {/* Learned Responses Tab */}
-      {tab === 'learned' && (
+      {canManageKnowledge && tab === 'learned' && (
         <div className="handoff-content">
           <div className="learned-header-actions">
             <button className="add-learned-btn" onClick={() => setShowAddForm(!showAddForm)}>

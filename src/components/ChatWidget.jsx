@@ -3,7 +3,9 @@ import { useTheme } from '../context/ThemeContext'
 import { downloadCSV } from '../utils/exportCSV'
 import { downloadPDF } from '../utils/exportPDF'
 import OrderTimeline from './OrderTimeline'
+import { analyticsFromToolResults, orderFromToolResults } from '../utils/analyticsFromTools'
 import './ChatWidget.css'
+import { AGENT_WS_URL } from '../config'
 
 function generateSessionId() {
   return 'sess-' + crypto.randomUUID()
@@ -16,6 +18,7 @@ export default function ChatWidget() {
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [connected, setConnected] = useState(false)
+  const [streamingText, setStreamingText] = useState('')
 
   const wsRef = useRef(null)
   const sessionIdRef = useRef(generateSessionId())
@@ -29,7 +32,7 @@ export default function ChatWidget() {
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages, isTyping, scrollToBottom])
+  }, [messages, isTyping, streamingText, scrollToBottom])
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -43,8 +46,9 @@ export default function ChatWidget() {
     if (hasConnectedRef.current) return
     hasConnectedRef.current = true
 
-    const sid = sessionIdRef.current
-    const ws = new WebSocket(`ws://localhost:8001/ws/chat/${sid}`)
+    // Deliberately unauthenticated: this widget is the public, customer
+    // facing surface, so the socket scopes it to the customer tool set.
+    const ws = new WebSocket(AGENT_WS_URL)
 
     ws.onopen = () => {
       setConnected(true)
@@ -56,15 +60,47 @@ export default function ChatWidget() {
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data)
-      setIsTyping(false)
-      setMessages(prev => [...prev, {
-        role: 'agent',
-        text: data.reply,
-        analyticsData: data.analytics_data || null,
-        intent: data.intent || '',
-        orderData: data.order_data || null,
-        timestamp: new Date(),
-      }])
+
+      switch (data.type) {
+        case 'stream':
+          setStreamingText(prev => prev + data.token)
+          break
+
+        case 'stream_clear':
+          setStreamingText('')
+          break
+
+        case 'response': {
+          const analytics = analyticsFromToolResults(data.tool_results)
+          setStreamingText('')
+          setIsTyping(false)
+          setMessages(prev => [...prev, {
+            role: 'agent',
+            text: data.message,
+            analyticsData: analytics?.data || null,
+            intent: analytics?.intent || '',
+            orderData: orderFromToolResults(data.tool_results),
+            assignedAgent: data.assigned_agent || null,
+            timestamp: new Date(),
+          }])
+          break
+        }
+
+        case 'error':
+          setStreamingText('')
+          setIsTyping(false)
+          setMessages(prev => [...prev, {
+            role: 'agent',
+            text: data.message || 'Something went wrong. Please try again.',
+            timestamp: new Date(),
+          }])
+          break
+
+        default:
+          // thinking / tool_call / tool_result / department_routed drive the
+          // full agent page; the widget only needs the answer.
+          break
+      }
     }
 
     ws.onclose = () => {
@@ -98,7 +134,7 @@ export default function ChatWidget() {
     setInput('')
     setIsTyping(true)
 
-    wsRef.current.send(JSON.stringify({ message: text }))
+    wsRef.current.send(JSON.stringify({ prompt: text, customer_id: sessionIdRef.current }))
   }
 
   const handleKeyDown = (e) => {
@@ -202,7 +238,12 @@ export default function ChatWidget() {
               )}
             </div>
           ))}
-          {isTyping && (
+          {streamingText && (
+            <div className="chat-msg-wrapper agent">
+              <div className="chat-bubble agent">{streamingText}</div>
+            </div>
+          )}
+          {isTyping && !streamingText && (
             <div className="chat-bubble agent typing-indicator">
               <span className="dot"></span>
               <span className="dot"></span>

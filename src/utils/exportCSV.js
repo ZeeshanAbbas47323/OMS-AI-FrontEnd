@@ -46,7 +46,7 @@ export function generateCSV(data, intent) {
   if (intent === 'analytics_profit') {
     const months = Object.entries(data.monthly_breakdown || {})
     return toCSV(
-      ['Month', 'Revenue', 'Product Cost', 'Shipping Cost', 'Profit', 'Orders'],
+      ['Order creation month', 'Delivered order value (not cash collected)', 'Product Cost', 'Shipping Cost', 'Order margin (excludes operating expenses/tax/returns)', 'Orders'],
       months.map(([m, d]) => [m, d.revenue, d.product_cost, d.shipping_cost, d.profit, d.order_count])
     )
   }

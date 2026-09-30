@@ -2,15 +2,16 @@ import { useState, useEffect } from 'react'
 import { useTheme } from '../../context/ThemeContext'
 import { Link } from 'react-router-dom'
 import './AgentPage.css'
+import { API_BASE } from '../../config'
 
-const API = 'http://localhost:8001'
+const API = API_BASE
 
 export default function ReturnRTO() {
   const { theme, toggleTheme } = useTheme()
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [filterReason, setFilterReason] = useState('all')
-  const [filterRefund, setFilterRefund] = useState('all')
+  
 
   const fetchData = async () => {
     setLoading(true)
@@ -25,12 +26,11 @@ export default function ReturnRTO() {
 
   const filtered = (data?.orders || []).filter(o => {
     if (filterReason !== 'all' && (o.return_reason || 'Unknown') !== filterReason) return false
-    if (filterRefund !== 'all' && o.refund_status !== filterRefund) return false
     return true
   })
 
   const reasons = [...new Set((data?.orders || []).map(o => o.return_reason || 'Unknown'))].sort()
-  const fmt = (n) => `Rs. ${(n || 0).toLocaleString()}`
+  const fmt = (n) => typeof n === 'number' ? `Rs. ${n.toLocaleString()}` : 'Unavailable'
 
   return (
     <div className="agent-page">
@@ -49,17 +49,18 @@ export default function ReturnRTO() {
 
       {data?.summary && (
         <>
+          <p>{data.summary.data_limits?.join(" ")} Returned order value: {fmt(data.summary.returned_order_value)}</p>
           <div className="agent-stats-row">
             <div className="agent-stat-card">
               <div className="agent-stat-value">{data.summary.total_returns}</div>
               <div className="agent-stat-label">Total Returns</div>
             </div>
             <div className="agent-stat-card" style={{borderLeft: '3px solid #27ae60'}}>
-              <div className="agent-stat-value">{data.summary.refund_processed}</div>
+              <div className="agent-stat-value">{data.summary.refund_processed ?? 'Unavailable'}</div>
               <div className="agent-stat-label">Refund Processed</div>
             </div>
             <div className="agent-stat-card" style={{borderLeft: '3px solid #e67e22'}}>
-              <div className="agent-stat-value">{data.summary.refund_pending}</div>
+              <div className="agent-stat-value">{data.summary.refund_pending ?? 'Unavailable'}</div>
               <div className="agent-stat-label">Pending Review</div>
             </div>
             <div className="agent-stat-card" style={{borderLeft: '3px solid #e74c3c'}}>
@@ -93,14 +94,6 @@ export default function ReturnRTO() {
             {reasons.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>
-        <div className="control-group">
-          <label>Refund Status:</label>
-          <select value={filterRefund} onChange={e => setFilterRefund(e.target.value)}>
-            <option value="all">All</option>
-            <option value="Processed">Processed</option>
-            <option value="Pending Review">Pending Review</option>
-          </select>
-        </div>
         <button className="refresh-btn" onClick={fetchData}>Refresh</button>
       </div>
 
@@ -119,7 +112,7 @@ export default function ReturnRTO() {
                 <th>Reason</th>
                 <th>Refund</th>
                 <th>Status</th>
-                <th>Days</th>
+                <th>Days since return</th>
               </tr>
             </thead>
             <tbody>
@@ -136,10 +129,10 @@ export default function ReturnRTO() {
                   <td>{fmt(o.refund_amount)}</td>
                   <td>
                     <span className={`table-badge ${o.refund_status === 'Processed' ? 'action-retry' : 'severity-high'}`}>
-                      {o.refund_status}
+                      {o.refund_status ?? 'Unavailable'}
                     </span>
                   </td>
-                  <td>{o.days_since_return}</td>
+                  <td>{o.days_since_return ?? 'Unavailable'}</td>
                 </tr>
               ))}
             </tbody>

@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { useTheme } from '../../context/ThemeContext'
 import { Link } from 'react-router-dom'
 import './AgentPage.css'
+import { API_BASE } from '../../config'
 
-const API = 'http://localhost:8001'
+const API = API_BASE
 
 export default function CODAgent() {
   const { theme, toggleTheme } = useTheme()
@@ -22,7 +23,7 @@ export default function CODAgent() {
 
   useEffect(() => { fetchData() }, [])
 
-  const fmt = (n) => `Rs. ${(n || 0).toLocaleString()}`
+  const fmt = (n) => typeof n === 'number' ? `Rs. ${n.toLocaleString()}` : 'Unavailable'
 
   return (
     <div className="agent-page">
@@ -31,7 +32,7 @@ export default function CODAgent() {
           <Link to="/agents" className="back-link">← Agents</Link>
           <div>
             <h1>💵 COD Agent</h1>
-            <p>COD remittance tracking, verification, reconciliation</p>
+            <p>COD order values and settlement-data availability</p>
           </div>
         </div>
         <button className="agent-theme-btn" onClick={toggleTheme}>
@@ -41,6 +42,7 @@ export default function CODAgent() {
 
       {data?.summary && (
         <>
+          <p>Delivered COD order value: {fmt(data.summary.delivered_order_value)}. Collection and remittance require settlement records.</p>
           <div className="agent-stats-row">
             <div className="agent-stat-card">
               <div className="agent-stat-value">{data.summary.total_cod_orders}</div>
@@ -60,6 +62,8 @@ export default function CODAgent() {
             </div>
           </div>
 
+          <p>Cancelled: {data.summary.cod_cancelled} ({fmt(data.summary.cancelled_order_value)}).
+            Unknown status: {data.summary.cod_unknown_status} ({fmt(data.summary.unknown_status_value)}).</p>
           <div className="agent-stats-row">
             <div className="agent-stat-card" style={{borderLeft: '3px solid #2ecc71'}}>
               <div className="agent-stat-value">{fmt(data.summary.collected)}</div>
@@ -70,18 +74,18 @@ export default function CODAgent() {
               <div className="agent-stat-label">Remittance Pending</div>
             </div>
             <div className="agent-stat-card" style={{borderLeft: '3px solid #3498db'}}>
-              <div className="agent-stat-value">{data.summary.collection_rate}%</div>
+              <div className="agent-stat-value">{data.summary.collection_rate == null ? 'Unavailable' : `${data.summary.collection_rate}%`}</div>
               <div className="agent-stat-label">Collection Rate</div>
             </div>
             <div className="agent-stat-card" style={{borderLeft: '3px solid #9b59b6'}}>
               <div className="agent-stat-value">{fmt(data.summary.pending_delivery_amount)}</div>
-              <div className="agent-stat-label">Pending COD Amount</div>
+              <div className="agent-stat-label">Pending delivery order value</div>
             </div>
           </div>
 
           {data.summary.by_courier && Object.keys(data.summary.by_courier).length > 0 && (
             <div className="reason-chips-section">
-              <h3>COD by Courier</h3>
+              <h3>Delivered COD order value by courier</h3>
               <div className="reason-chips">
                 {Object.entries(data.summary.by_courier).map(([courier, info]) => (
                   <span key={courier} className="reason-chip">

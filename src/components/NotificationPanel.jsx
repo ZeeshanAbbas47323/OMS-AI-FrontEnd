@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import './NotificationPanel.css'
+import { API_BASE } from '../config'
 
-const API = 'http://localhost:8001/mock/oms/alerts'
+const API = `${API_BASE}/mock/oms/alerts`
 
 const SEVERITY_ICONS = { high: '🔴', medium: '🟡', low: '🟢' }
 const TYPE_ICONS = { stuck_order: '⏸️', return: '↩️', failed_delivery: '❌' }

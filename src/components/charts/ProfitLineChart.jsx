@@ -23,10 +23,10 @@ export default function ProfitLineChart({ monthlyBreakdown }) {
         <YAxis tickFormatter={formatPKR} />
         <Tooltip formatter={(v, name) => [`PKR ${v.toLocaleString()}`, name]} />
         <Legend />
-        <Bar dataKey="revenue" name="Revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="revenue" name="Delivered order value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
         <Bar dataKey="productCost" name="Product Cost" fill="#f59e0b" radius={[4, 4, 0, 0]} />
         <Bar dataKey="shippingCost" name="Shipping Cost" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-        <Line type="monotone" dataKey="profit" name="Profit" stroke="#10b981" strokeWidth={3} dot={{ r: 5 }} />
+        <Line type="monotone" dataKey="profit" name="Order margin" stroke="#10b981" strokeWidth={3} dot={{ r: 5 }} />
       </ComposedChart>
     </ResponsiveContainer>
   )

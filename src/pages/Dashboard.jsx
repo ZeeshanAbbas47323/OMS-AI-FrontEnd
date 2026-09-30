@@ -8,8 +8,9 @@ import ProfitLineChart from '../components/charts/ProfitLineChart'
 import CourierBarChart from '../components/charts/CourierBarChart'
 import CityBarChart from '../components/charts/CityBarChart'
 import './Dashboard.css'
+import { API_BASE } from '../config'
 
-const API = 'http://localhost:8001/mock/oms/analytics'
+const API = `${API_BASE}/mock/oms/analytics`
 
 function buildQuery(params) {
   const q = new URLSearchParams()
@@ -30,7 +31,7 @@ export default function Dashboard() {
   const [alertCount, setAlertCount] = useState(0)
 
   useEffect(() => {
-    fetch('http://localhost:8001/mock/oms/alerts')
+    fetch(`${API_BASE}/mock/oms/alerts`)
       .then(r => r.json())
       .then(d => setAlertCount(d.summary?.total_alerts || 0))
       .catch(() => {})
@@ -42,7 +43,7 @@ export default function Dashboard() {
 
     const summaryQ = buildQuery({ days: filters.days, city: filters.city, courier: filters.courier, payment_method: filters.payment })
     const returnsQ = buildQuery({ days: filters.days, city: filters.city, courier: filters.courier, payment_method: filters.payment })
-    const profitQ = buildQuery({ days: filters.days })
+    const profitQ = summaryQ
     const couriersQ = buildQuery({ days: filters.days, city: filters.city, courier: filters.courier, payment_method: filters.payment })
     const citiesQ = buildQuery({ days: filters.days, courier: filters.courier, payment_method: filters.payment })
 
@@ -129,12 +130,13 @@ export default function Dashboard() {
         </div>
 
         <div className="chart-card">
-          <h3>Profit & Revenue</h3>
+          <h3>Delivered Order Margin</h3>
+          <p>{profit.error || profit.data_limits?.join(' ')}</p>
           <ProfitLineChart monthlyBreakdown={profit.monthly_breakdown} />
           <div className="profit-summary">
-            <span>Total Revenue: <strong>PKR {profit.total_revenue?.toLocaleString()}</strong></span>
-            <span>Total Profit: <strong>PKR {profit.total_profit?.toLocaleString()}</strong></span>
-            <span>Margin: <strong>{profit.profit_margin}%</strong></span>
+            <span>Delivered order value: <strong>{profit.total_revenue == null ? 'Unavailable' : `PKR ${profit.total_revenue.toLocaleString()}`}</strong></span>
+            <span>Order margin: <strong>{profit.total_profit == null ? 'Unavailable' : `PKR ${profit.total_profit.toLocaleString()}`}</strong></span>
+            <span>Margin: <strong>{profit.profit_margin == null ? 'Unavailable' : `${profit.profit_margin}%`}</strong></span>
           </div>
         </div>
 

@@ -3,8 +3,9 @@ import { useTheme } from '../../context/ThemeContext'
 import { Link } from 'react-router-dom'
 import OrderTimeline from '../../components/OrderTimeline'
 import './AgentPage.css'
+import { API_BASE } from '../../config'
 
-const API = 'http://localhost:8001'
+const API = API_BASE
 
 export default function ShipmentTracking() {
   const { theme, toggleTheme } = useTheme()

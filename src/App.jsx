@@ -1,5 +1,8 @@
-import { Routes, Route } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
+import { useLocation } from "react-router-dom";
 import ChatWidget from './components/ChatWidget'
+import RequireAuth from './components/RequireAuth'
+import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import AdminPanel from './pages/AdminPanel'
 import KnowledgeManager from './pages/KnowledgeManager'
@@ -20,39 +23,55 @@ import ShipmentInvestigation from './pages/agents/ShipmentInvestigation'
 import DailyCSReport from './pages/agents/DailyCSReport'
 import CSPerformance from './pages/agents/CSPerformance'
 import OrioAgent from './pages/agents/OrioAgent'
+import SalesAgent from './pages/agents/SalesAgent'
+import Tickets from './pages/Tickets'
+import Outbox from './pages/Outbox'
+import Inbox from './pages/Inbox'
+import Usage from './pages/Usage'
 import HandoffAdmin from './pages/HandoffAdmin'
 import TeamManager from './pages/TeamManager'
 import './App.css'
 
 function App() {
+  
+  const location = useLocation();
+
+  console.log(location.pathname)
   return (
     <div className="app">
       <Routes>
+        <Route path="/login" element={<Login />} />
         <Route path="/" element={<div />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/admin/knowledge" element={<KnowledgeManager />} />
-        <Route path="/agents" element={<AgentDashboard />} />
-        <Route path="/agents/shipment-tracking" element={<ShipmentTracking />} />
-        <Route path="/agents/customer-reply" element={<CustomerReply />} />
-        <Route path="/agents/cs-knowledge" element={<CSKnowledge />} />
-        <Route path="/agents/stuck-shipment" element={<StuckShipment />} />
-        <Route path="/agents/delivery-delay" element={<DeliveryDelay />} />
-        <Route path="/agents/ndr" element={<NDRAgent />} />
-        <Route path="/agents/pickup" element={<PickupAgent />} />
-        <Route path="/agents/cod" element={<CODAgent />} />
-        <Route path="/agents/return-rto" element={<ReturnRTO />} />
-        <Route path="/agents/customer-complaint" element={<CustomerComplaint />} />
-        <Route path="/agents/courier-escalation" element={<CourierEscalation />} />
-        <Route path="/agents/priority-escalation" element={<PriorityEscalation />} />
-        <Route path="/agents/shipment-investigation" element={<ShipmentInvestigation />} />
-        <Route path="/agents/daily-cs-report" element={<DailyCSReport />} />
-        <Route path="/agents/cs-performance" element={<CSPerformance />} />
-        <Route path="/agents/orio" element={<OrioAgent />} />
-        <Route path="/admin/handoffs" element={<HandoffAdmin />} />
-        <Route path="/admin/team" element={<TeamManager />} />
+        <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+        <Route path="/admin" element={<RequireAuth><AdminPanel /></RequireAuth>} />
+        <Route path="/tickets" element={<RequireAuth><Tickets /></RequireAuth>} />
+        <Route path="/admin/knowledge" element={<RequireAuth><KnowledgeManager /></RequireAuth>} />
+        <Route path="/agents" element={<RequireAuth><AgentDashboard /></RequireAuth>} />
+        <Route path="/agents/shipment-tracking" element={<RequireAuth><ShipmentTracking /></RequireAuth>} />
+        <Route path="/agents/customer-reply" element={<RequireAuth><CustomerReply /></RequireAuth>} />
+        <Route path="/agents/cs-knowledge" element={<RequireAuth><CSKnowledge /></RequireAuth>} />
+        <Route path="/agents/stuck-shipment" element={<RequireAuth><StuckShipment /></RequireAuth>} />
+        <Route path="/agents/delivery-delay" element={<RequireAuth><DeliveryDelay /></RequireAuth>} />
+        <Route path="/agents/ndr" element={<RequireAuth><NDRAgent /></RequireAuth>} />
+        <Route path="/agents/pickup" element={<RequireAuth><PickupAgent /></RequireAuth>} />
+        <Route path="/agents/cod" element={<RequireAuth><CODAgent /></RequireAuth>} />
+        <Route path="/agents/return-rto" element={<RequireAuth><ReturnRTO /></RequireAuth>} />
+        <Route path="/agents/customer-complaint" element={<RequireAuth><CustomerComplaint /></RequireAuth>} />
+        <Route path="/agents/courier-escalation" element={<RequireAuth><CourierEscalation /></RequireAuth>} />
+        <Route path="/agents/priority-escalation" element={<RequireAuth><PriorityEscalation /></RequireAuth>} />
+        <Route path="/agents/shipment-investigation" element={<RequireAuth><ShipmentInvestigation /></RequireAuth>} />
+        <Route path="/agents/daily-cs-report" element={<RequireAuth><DailyCSReport /></RequireAuth>} />
+        <Route path="/agents/cs-performance" element={<RequireAuth><CSPerformance /></RequireAuth>} />
+        <Route path="/agents/orio" element={<RequireAuth><OrioAgent /></RequireAuth>} />
+        <Route path="/agents/sales-agent" element={<RequireAuth><SalesAgent /></RequireAuth>} />
+        <Route path="/outbox" element={<RequireAuth><Outbox /></RequireAuth>} />
+        <Route path="/inbox" element={<RequireAuth><Inbox /></RequireAuth>} />
+        <Route path="/usage" element={<RequireAuth><Usage /></RequireAuth>} />
+        <Route path="/admin/handoffs" element={<RequireAuth><HandoffAdmin /></RequireAuth>} />
+        <Route path="/admin/team" element={<RequireAuth><TeamManager /></RequireAuth>} />
       </Routes>
-      <ChatWidget />
+      {!location.pathname.startsWith("/agents") && <ChatWidget />}
+      {/* <ChatWidget /> */}
     </div>
   )
 }
