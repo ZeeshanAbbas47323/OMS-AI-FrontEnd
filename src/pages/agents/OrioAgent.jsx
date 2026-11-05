@@ -1410,12 +1410,12 @@ function InvoicesDetail({ data: initialData, params }) {
           <div><span className="detail-label">Orders on Invoice:</span> {data.order_count}</div>
           <div><span className="detail-label">Total Order Value:</span> Rs. {(data.total_order_amount || 0).toLocaleString()}</div>
           <div><span className="detail-label">Total Charges:</span> Rs. {(data.total_charges || 0).toLocaleString()}</div>
-          <div><span className="detail-label">Total Courier Charges:</span> Rs. {(data.total_courier_charges || 0).toLocaleString()}</div>
+          <div><span className="detail-label">Total Net Amount:</span> Rs. {(data.total_net_amount || 0).toLocaleString()}</div>
         </div>
         {orders.length > 0 && (
           <table className="detail-table">
             <thead>
-              <tr><th>Order #</th><th>Tracking #</th><th>Amount</th><th>Weight</th><th>Charges</th><th>Courier Charges</th></tr>
+              <tr><th>Order #</th><th>Tracking #</th><th>Amount</th><th>Weight</th><th>Charges</th><th>Net Amount</th></tr>
             </thead>
             <tbody>
               {orders.map((o, i) => (
@@ -1425,7 +1425,7 @@ function InvoicesDetail({ data: initialData, params }) {
                   <td>Rs. {(o.order_amount || 0).toLocaleString()}</td>
                   <td>{o.weight ?? "—"}</td>
                   <td>Rs. {(o.charges || 0).toLocaleString()}</td>
-                  <td>{o.courier_charges != null ? `Rs. ${o.courier_charges.toLocaleString()}` : "—"}</td>
+                  <td>{o.net_amount != null ? `Rs. ${o.net_amount.toLocaleString()}` : "—"}</td>
                 </tr>
               ))}
             </tbody>
