@@ -406,6 +406,7 @@ function ToolCard({ tool, params, result, fullResult, expanded, onToggle, action
     list_expenses: '💸',
     list_invoices: '🧾',
     list_pickup_locations: '📍',
+    list_rules: '⚙️',
     courier_insights: '📈',
     courier_advisor: '✨',
     compare_periods: '📊',
@@ -426,6 +427,7 @@ function ToolCard({ tool, params, result, fullResult, expanded, onToggle, action
     list_expenses: 'List Expenses',
     list_invoices: 'Invoices',
     list_pickup_locations: 'Pickup Locations',
+    list_rules: 'Orio Rules',
     courier_insights: 'Courier Insights',
     courier_advisor: 'Smart Courier Advisor',
     compare_periods: 'Compare Periods',
@@ -499,6 +501,9 @@ function ToolCard({ tool, params, result, fullResult, expanded, onToggle, action
           {tool === 'list_pickup_locations' && result.found !== undefined && (
             <span>{result.found} pickup location{result.found === 1 ? '' : 's'} found</span>
           )}
+          {tool === 'list_rules' && result.found !== undefined && (
+            <span>{result.found} rule{result.found === 1 ? '' : 's'} • {result.active} active • {result.inactive} inactive</span>
+          )}
           {tool === 'courier_insights' && result.order_id !== undefined && (
             <span>Order #{result.order_id} — {result.status} — {result.courier}</span>
           )}
@@ -532,6 +537,7 @@ function ToolCard({ tool, params, result, fullResult, expanded, onToggle, action
           {tool === 'list_expenses' && <ExpensesDetail data={fullResult} />}
           {tool === 'list_invoices' && <InvoicesDetail data={fullResult} params={params} />}
           {tool === 'list_pickup_locations' && <PickupLocationsDetail data={fullResult} params={params} />}
+          {tool === 'list_rules' && <RulesDetail data={fullResult} />}
           {tool === 'courier_insights' && <CourierInsightsDetail data={fullResult} params={params} />}
           {tool === 'courier_advisor' && <CourierAdvisorDetail data={fullResult} />}
           {tool === 'compare_periods' && <PeriodComparisonDetail data={fullResult} />}
@@ -1491,6 +1497,68 @@ function PickupLocationsDetail({ data: initialData, params }) {
         <PageControls offset={data.offset || 0} limit={limit} found={data.found}
           hasNext={data.next_offset != null} loading={loading} error={error} onGo={goToOffset} />
       )}
+    </div>
+  )
+}
+
+function RulesDetail({ data }) {
+  // A handful of rules per account, returned whole by list_rules — no paging.
+  const rules = data.rules || []
+  const cond = (c) => {
+    const rows = []
+    if (c.weight) rows.push(['Weight', `${c.weight.operator} | ${c.weight.value_kg} KG`])
+    if (c.order_amount) rows.push(['Order Amount', `${c.order_amount.operator} | ${c.order_amount.value}`])
+    if (c.address_keywords) rows.push(['Address Keywords', `${c.address_keywords.operator || 'match'} | ${c.address_keywords.keywords}`])
+    if (c.payment_method) rows.push(['Payment Method', c.payment_method])
+    if (c.cities) rows.push(['Cities', c.cities])
+    if (c.platform) rows.push(['Platform', c.platform])
+    return rows
+  }
+  return (
+    <div className="detail-content">
+      <div className="detail-stat-row">
+        <div className="detail-stat">Total Rules: <strong>{data.found}</strong></div>
+        <div className="detail-stat">Active: <strong>{data.active}</strong></div>
+        <div className="detail-stat">Inactive: <strong>{data.inactive}</strong></div>
+      </div>
+      <div className="detail-table-scroll rules-scroll">
+        <table className="detail-table rules-table">
+          <thead>
+            <tr><th>Rule Title</th><th>If Trigger</th><th>Condition</th><th>Then</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            {rules.map((r) => {
+              const rows = cond(r.conditions || {})
+              return (
+                <tr key={r.rule_id}>
+                  <td className="ci-bold">{r.title}</td>
+                  <td>{(r.trigger || []).map((t) => (
+                    <span key={t} className="ci-badge ci-badge-purple rule-trigger">{t.toUpperCase()}</span>
+                  ))}</td>
+                  <td>
+                    {rows.length === 0
+                      ? <div className="rule-sub">No conditions</div>
+                      : rows.map(([k, v]) => (
+                        <div key={k}><span className="ci-bold">{k}</span> <span className="rule-sub">| {v}</span></div>
+                      ))}
+                  </td>
+                  <td>
+                    <div className="ci-bold">{r.action?.courier_account || r.action?.courier}</div>
+                    {r.action?.courier && <div className="rule-sub">{r.action.courier}</div>}
+                    {r.action?.service && <div className="rule-sub">Service: {r.action.service}</div>}
+                    {r.action?.pickup_location && <div className="rule-sub">Pickup: {r.action.pickup_location}</div>}
+                  </td>
+                  <td>
+                    <span className={`ci-badge ${r.status === 'active' ? 'ci-badge-green' : 'ci-badge-red'}`}>
+                      {r.status.toUpperCase()}
+                    </span>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

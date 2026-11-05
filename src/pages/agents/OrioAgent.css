@@ -758,6 +758,22 @@
   border-bottom: 1px solid var(--border, #eee);
 }
 
+.rule-sub {
+  color: var(--text-secondary, #666);
+}
+
+.rule-trigger {
+  margin-right: 4px;
+}
+
+.rules-scroll {
+  max-height: 560px;
+}
+
+.rules-table td {
+  vertical-align: top;
+}
+
 .mini-badge {
   padding: 2px 6px;
   border-radius: 4px;
