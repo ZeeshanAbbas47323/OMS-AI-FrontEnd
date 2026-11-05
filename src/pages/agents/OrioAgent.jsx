@@ -407,6 +407,7 @@ function ToolCard({ tool, params, result, fullResult, expanded, onToggle, action
     list_invoices: '🧾',
     list_pickup_locations: '📍',
     list_rules: '⚙️',
+    cod_payout: '💰',
     courier_insights: '📈',
     courier_advisor: '✨',
     compare_periods: '📊',
@@ -428,6 +429,7 @@ function ToolCard({ tool, params, result, fullResult, expanded, onToggle, action
     list_invoices: 'Invoices',
     list_pickup_locations: 'Pickup Locations',
     list_rules: 'Orio Rules',
+    cod_payout: 'COD Payout',
     courier_insights: 'Courier Insights',
     courier_advisor: 'Smart Courier Advisor',
     compare_periods: 'Compare Periods',
@@ -504,6 +506,9 @@ function ToolCard({ tool, params, result, fullResult, expanded, onToggle, action
           {tool === 'list_rules' && result.found !== undefined && (
             <span>{result.found} rule{result.found === 1 ? '' : 's'} • {result.active} active • {result.inactive} inactive</span>
           )}
+          {tool === 'cod_payout' && result.pending_payout !== undefined && (
+            <span>Pending payout Rs. {(result.pending_payout || 0).toLocaleString()} • {result.delivered_not_invoiced?.orders || 0} delivered orders not invoiced</span>
+          )}
           {tool === 'courier_insights' && result.order_id !== undefined && (
             <span>Order #{result.order_id} — {result.status} — {result.courier}</span>
           )}
@@ -538,6 +543,7 @@ function ToolCard({ tool, params, result, fullResult, expanded, onToggle, action
           {tool === 'list_invoices' && <InvoicesDetail data={fullResult} params={params} />}
           {tool === 'list_pickup_locations' && <PickupLocationsDetail data={fullResult} params={params} />}
           {tool === 'list_rules' && <RulesDetail data={fullResult} />}
+          {tool === 'cod_payout' && <CodPayoutDetail data={fullResult} />}
           {tool === 'courier_insights' && <CourierInsightsDetail data={fullResult} params={params} />}
           {tool === 'courier_advisor' && <CourierAdvisorDetail data={fullResult} />}
           {tool === 'compare_periods' && <PeriodComparisonDetail data={fullResult} />}
@@ -1497,6 +1503,56 @@ function PickupLocationsDetail({ data: initialData, params }) {
         <PageControls offset={data.offset || 0} limit={limit} found={data.found}
           hasNext={data.next_offset != null} loading={loading} error={error} onGo={goToOffset} />
       )}
+    </div>
+  )
+}
+
+function CodPayoutDetail({ data }) {
+  const rs = (n) => `Rs. ${(n || 0).toLocaleString()}`
+  const rows = [
+    ['Paid', 'Invoice paid', data.paid, 'ci-badge-green'],
+    ['Invoiced, unpaid', 'Invoice raised, payment pending', data.invoiced_unpaid, 'ci-badge-red'],
+    ['Delivered, not invoiced', 'Delivered, invoice not raised yet', data.delivered_not_invoiced, 'ci-badge-red'],
+    ['In transit', 'Not delivered yet — not owed yet', data.in_transit, 'ci-badge-purple'],
+  ]
+  const months = Object.entries(data.delivered_not_invoiced?.by_month || {})
+  return (
+    <div className="detail-content">
+      <div className="detail-stat-row">
+        <div className="detail-stat">Pending payout: <strong>{rs(data.pending_payout)}</strong></div>
+        <div className="detail-stat">Unpaid invoices: <strong>{(data.invoiced_unpaid?.invoice_names || []).join(', ') || '—'}</strong></div>
+      </div>
+      <table className="detail-table">
+        <thead>
+          <tr><th>Bucket</th><th>Orders</th><th>COD Amount</th><th>Charges</th><th>Net</th><th>Oldest (days)</th></tr>
+        </thead>
+        <tbody>
+          {rows.map(([label, hint, b, badge]) => (
+            <tr key={label}>
+              <td><span className={`ci-badge ${badge}`}>{label}</span><div className="rule-sub">{hint}</div></td>
+              <td>{b?.orders ?? 0}</td>
+              <td>{rs(b?.amount)}</td>
+              <td>{b?.charges != null ? rs(b.charges) : '—'}</td>
+              <td>{b?.net != null ? rs(b.net) : '—'}</td>
+              <td>{b?.oldest_days ?? '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {months.length > 0 && (
+        <>
+          <div className="detail-label" style={{ marginTop: 12 }}>Delivered, not invoiced — by month</div>
+          <table className="detail-table">
+            <thead><tr><th>Month</th><th>Orders</th><th>COD Amount</th></tr></thead>
+            <tbody>
+              {months.map(([m, v]) => (
+                <tr key={m}><td>{m}</td><td>{v.orders}</td><td>{rs(v.amount)}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+      <div className="rule-sub" style={{ marginTop: 8 }}>{data.note}</div>
     </div>
   )
 }
