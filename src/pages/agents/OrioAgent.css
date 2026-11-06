@@ -2302,3 +2302,59 @@ a.action-log-btn {
 
 .orio-speak-btn:hover { border-color: #4f46e5; color: #4f46e5; }
 .orio-speak-btn.speaking { border-color: #4f46e5; color: #4f46e5; }
+
+.tariff-courier {
+  border: 1px solid var(--border, #eee);
+  border-radius: 8px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.tariff-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+}
+
+.tariff-title {
+  flex: 1;
+}
+
+.tariff-chevron {
+  color: var(--text-secondary, #666);
+}
+
+.tariff-body {
+  padding: 0 12px 12px;
+}
+
+.tariff-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.tariff-chip {
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border, #ddd);
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tariff-chip.on {
+  background: #e8f5e9;
+  border-color: #2e7d32;
+  color: #2e7d32;
+}

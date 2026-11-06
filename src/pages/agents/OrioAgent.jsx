@@ -408,6 +408,7 @@ function ToolCard({ tool, params, result, fullResult, expanded, onToggle, action
     list_pickup_locations: '📍',
     list_rules: '⚙️',
     cod_payout: '💰',
+    tariff: '🏷️',
     courier_insights: '📈',
     courier_advisor: '✨',
     compare_periods: '📊',
@@ -430,6 +431,7 @@ function ToolCard({ tool, params, result, fullResult, expanded, onToggle, action
     list_pickup_locations: 'Pickup Locations',
     list_rules: 'Orio Rules',
     cod_payout: 'COD Payout',
+    tariff: 'Tariff',
     courier_insights: 'Courier Insights',
     courier_advisor: 'Smart Courier Advisor',
     compare_periods: 'Compare Periods',
@@ -509,6 +511,9 @@ function ToolCard({ tool, params, result, fullResult, expanded, onToggle, action
           {tool === 'cod_payout' && result.pending_payout !== undefined && (
             <span>Pending payout Rs. {(result.pending_payout || 0).toLocaleString()} • {result.delivered_not_invoiced?.orders || 0} delivered orders not invoiced</span>
           )}
+          {tool === 'tariff' && result.couriers !== undefined && (
+            <span>{result.couriers.length} courier{result.couriers.length === 1 ? '' : 's'} • {result.found} slabs</span>
+          )}
           {tool === 'courier_insights' && result.order_id !== undefined && (
             <span>Order #{result.order_id} — {result.status} — {result.courier}</span>
           )}
@@ -544,6 +549,7 @@ function ToolCard({ tool, params, result, fullResult, expanded, onToggle, action
           {tool === 'list_pickup_locations' && <PickupLocationsDetail data={fullResult} params={params} />}
           {tool === 'list_rules' && <RulesDetail data={fullResult} />}
           {tool === 'cod_payout' && <CodPayoutDetail data={fullResult} />}
+          {tool === 'tariff' && <TariffDetail data={fullResult} />}
           {tool === 'courier_insights' && <CourierInsightsDetail data={fullResult} params={params} />}
           {tool === 'courier_advisor' && <CourierAdvisorDetail data={fullResult} />}
           {tool === 'compare_periods' && <PeriodComparisonDetail data={fullResult} />}
@@ -1503,6 +1509,82 @@ function PickupLocationsDetail({ data: initialData, params }) {
         <PageControls offset={data.offset || 0} limit={limit} found={data.found}
           hasNext={data.next_offset != null} loading={loading} error={error} onGo={goToOffset} />
       )}
+    </div>
+  )
+}
+
+function TariffCourier({ courier, defaultOpen }) {
+  const [open, setOpen] = useState(defaultOpen)
+  const [region, setRegion] = useState('')
+  const pkr = (n) => `PKR ${Number(n || 0).toFixed(2)}`
+  const since = courier.since
+    ? new Date(courier.since).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+    : null
+  const slabs = region ? courier.slabs.filter((s) => s.region === region) : courier.slabs
+  return (
+    <div className="tariff-courier">
+      <button type="button" className="tariff-head" onClick={() => setOpen(!open)}>
+        <div className="tariff-title">
+          <div className="ci-bold">{courier.courier}</div>
+          <div className="rule-sub">
+            {since ? `Active since ${since} • ` : ''}{courier.slab_count} slabs
+          </div>
+        </div>
+        <span className={`ci-badge ${courier.status === 'active' ? 'ci-badge-green' : 'ci-badge-red'}`}>
+          {String(courier.status).toUpperCase()}
+        </span>
+        <span className="tariff-chevron">{open ? '▴' : '▾'}</span>
+      </button>
+      {open && (
+        <div className="tariff-body">
+          <div className="tariff-chips">
+            <button type="button" className={`tariff-chip ${region === '' ? 'on' : ''}`} onClick={() => setRegion('')}>All regions</button>
+            {courier.regions.map((r) => (
+              <button type="button" key={r} className={`tariff-chip ${region === r ? 'on' : ''}`} onClick={() => setRegion(r)}>{r}</button>
+            ))}
+          </div>
+          <div className="detail-table-scroll rules-scroll">
+            <table className="detail-table">
+              <thead>
+                <tr>
+                  <th>Weight</th><th>Region</th><th>Service</th><th>Charges</th><th>Additional</th>
+                </tr>
+              </thead>
+              <tbody>
+                {slabs.map((s, i) => (
+                  <tr key={i}>
+                    <td className="ci-bold">{s.start_weight} – {s.end_weight} kg</td>
+                    <td>{s.region}</td>
+                    <td style={{ textTransform: 'capitalize' }}>{s.service}</td>
+                    <td className="ci-bold">{pkr(s.charges)}</td>
+                    <td>
+                      {s.additional_charges > 0
+                        ? <>{pkr(s.additional_charges)} <span className="rule-sub">per {s.additional_weight} kg</span></>
+                        : <span className="rule-sub">—</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function TariffDetail({ data }) {
+  const couriers = data.couriers || []
+  return (
+    <div className="detail-content">
+      <div className="detail-stat-row">
+        <div className="detail-stat">Couriers: <strong>{couriers.length}</strong></div>
+        <div className="detail-stat">Slabs: <strong>{data.found}</strong></div>
+        <div className="detail-stat">Currency: <strong>{data.currency || 'PKR'}</strong></div>
+      </div>
+      {couriers.map((c, i) => (
+        <TariffCourier key={c.courier} courier={c} defaultOpen={couriers.length === 1 || i === 0} />
+      ))}
     </div>
   )
 }
