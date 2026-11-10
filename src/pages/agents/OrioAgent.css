@@ -2482,3 +2482,59 @@ a.action-log-btn {
 [data-theme="dark"] .orio-act-btn:hover { background: var(--bg-card, #2a2a2a); }
 [data-theme="dark"] .orio-act-btn.active.up { background: #12301f; }
 [data-theme="dark"] .orio-act-btn.active.down { background: #3b1014; }
+
+/* Morning Brief */
+.orio-brief {
+  width: 100%;
+  max-width: 560px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--border, #d0d7e6);
+  border-radius: 14px;
+  background: var(--bg-card, #fff);
+  text-align: left;
+}
+
+.orio-brief-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.orio-brief-title { font-size: 15px; font-weight: 600; color: var(--text-primary, #222); }
+.orio-brief-sub { font-size: 12px; color: var(--text-secondary, #666); margin-top: 2px; }
+
+.orio-brief-close {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #666);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.orio-brief-items { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+
+.orio-brief-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-left: 3px solid var(--border, #d0d7e6);
+  border-radius: 8px;
+  background: var(--surface, #f0f4ff);
+  color: var(--text-primary, #222);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.orio-brief-item:hover { border-color: var(--primary, #4a6cf7); transform: translateX(2px); }
+.orio-brief-item.warn { border-left-color: #e08a1e; }
+.orio-brief-item.good { border-left-color: #2e9e5b; }
+.orio-brief-item.info { border-left-color: var(--primary, #4a6cf7); }
+.orio-brief-text { flex: 1; }
+.orio-brief-go { color: var(--text-secondary, #666); font-size: 18px; }
+
+[data-theme="dark"] .orio-brief { background: var(--bg-card, #2a2a2a); }
+[data-theme="dark"] .orio-brief-item { background: var(--bg-secondary, #1e1e1e); color: var(--text-primary, #eee); }

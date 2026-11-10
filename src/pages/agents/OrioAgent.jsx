@@ -46,6 +46,34 @@ function SuggestionChips({ suggestions, onPick }) {
   )
 }
 
+// The Morning Brief: what needs attention today, one click from the
+// question that digs into it. Dismissible until tomorrow.
+function MorningBrief({ brief, onPick, onDismiss }) {
+  if (!brief || !brief.items || brief.items.length === 0) return null
+  return (
+    <div className="orio-brief">
+      <div className="orio-brief-head">
+        <div>
+          <div className="orio-brief-title">{brief.greeting || 'Hello'} — here is your day</div>
+          <div className="orio-brief-sub">
+            {brief.stale ? `Last updated ${brief.as_of}${brief.loading ? ' · refreshing…' : ''}` : 'Updated today'}
+          </div>
+        </div>
+        <button className="orio-brief-close" onClick={onDismiss} title="Hide until tomorrow" aria-label="Hide brief">×</button>
+      </div>
+      <div className="orio-brief-items">
+        {brief.items.map((it, i) => (
+          <button key={i} className={`orio-brief-item ${it.severity}`} onClick={() => onPick(it.prompt)}>
+            <span className="orio-brief-icon">{it.icon}</span>
+            <span className="orio-brief-text">{it.text}</span>
+            <span className="orio-brief-go" aria-hidden="true">›</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 const FEEDBACK_REASONS = [
   ['wrong_numbers', 'Wrong numbers'],
   ['misunderstood', "Didn't understand me"],
@@ -2008,6 +2036,10 @@ export default function OrioAgent() {
   // Per-answer thumbs rating ({[msgIdx]: {rating, reason}}) and which
   // answer was just copied. Kept in memory: the rating itself is stored
   // server-side, this only drives the buttons' highlight.
+  const [brief, setBrief] = useState(null)
+  const [briefHidden, setBriefHidden] = useState(() => {
+    try { return localStorage.getItem('orio_brief_hidden') === new Date().toDateString() } catch { return false }
+  })
   const [feedbackByMsg, setFeedbackByMsg] = useState({})
   const [copiedIdx, setCopiedIdx] = useState(null)
   const autonomousRef = useRef(null)
@@ -2040,6 +2072,30 @@ export default function OrioAgent() {
     load(true)
     return () => { cancelled = true; clearTimeout(retry) }
   }, [])
+
+  // Same shape as the starters: show what is ready, and when the server is
+  // still computing today's snapshot ask once more a few seconds later.
+  useEffect(() => {
+    let cancelled = false
+    let retry = null
+    const load = (again) => {
+      fetch(`${API_BASE}/api/agent/brief`)
+        .then(r => (r.ok ? r.json() : null))
+        .then(d => {
+          if (cancelled || !d) return
+          setBrief(d)
+          if (d.loading && again) retry = setTimeout(() => load(false), 15000)
+        })
+        .catch(() => {})
+    }
+    load(true)
+    return () => { cancelled = true; clearTimeout(retry) }
+  }, [])
+
+  const dismissBrief = () => {
+    setBriefHidden(true)
+    try { localStorage.setItem('orio_brief_hidden', new Date().toDateString()) } catch { /* private mode */ }
+  }
 
   useEffect(() => {
     fetch(`${API_BASE}/api/models`)
@@ -2668,6 +2724,7 @@ export default function OrioAgent() {
             <div className="orio-empty-icon">🤖</div>
             <h2>Orio AI Assistant</h2>
             <p>I'm your intelligent assistant — ask me anything! I can help with general questions, OMS operations, orders, reports, and more.</p>
+            {!briefHidden && <MorningBrief brief={brief} onPick={sendPrompt} onDismiss={dismissBrief} />}
             {starters ? (
               <div className="orio-starters">
                 {starters.map((c, i) => (
