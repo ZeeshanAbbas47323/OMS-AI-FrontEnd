@@ -167,6 +167,7 @@ export default function AgentDashboard() {
         </div>
         <div className="agent-dashboard-actions">
           <a href="/admin/team" className="agent-nav-btn">🏢 Team</a>
+          <a href="/admin/users" className="agent-nav-btn">👥 Users</a>
           <a href="/admin" className="agent-nav-btn">🛡️ Admin</a>
           <a href="/dashboard" className="agent-nav-btn">📊 Analytics</a>
           <button className="agent-theme-btn" onClick={toggleTheme}>

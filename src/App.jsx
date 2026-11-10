@@ -30,6 +30,7 @@ import Inbox from './pages/Inbox'
 import Usage from './pages/Usage'
 import HandoffAdmin from './pages/HandoffAdmin'
 import TeamManager from './pages/TeamManager'
+import UserManager from './pages/UserManager'
 import './App.css'
 
 function App() {
@@ -69,6 +70,7 @@ function App() {
         <Route path="/usage" element={<RequireAuth><Usage /></RequireAuth>} />
         <Route path="/admin/handoffs" element={<RequireAuth><HandoffAdmin /></RequireAuth>} />
         <Route path="/admin/team" element={<RequireAuth><TeamManager /></RequireAuth>} />
+        <Route path="/admin/users" element={<RequireAuth><UserManager /></RequireAuth>} />
       </Routes>
       {!location.pathname.startsWith("/agents") && <ChatWidget />}
       {/* <ChatWidget /> */}
