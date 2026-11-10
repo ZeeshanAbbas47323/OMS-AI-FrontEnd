@@ -2444,7 +2444,12 @@ a.action-log-btn {
 }
 
 .orio-act-btn {
-  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border: 1px solid transparent;
   border-radius: 6px;
   background: transparent;
@@ -2458,7 +2463,9 @@ a.action-log-btn {
 .orio-act-btn:hover { background: var(--surface, #f0f4ff); }
 .orio-act-btn.active { border-color: var(--primary, #4a6cf7); color: var(--text, #333); }
 .orio-act-btn.active.up { background: #e6f6ec; border-color: #2e9e5b; }
-.orio-act-btn.active.down { background: #fdecec; border-color: #d64545; }
+.orio-act-btn.active.down { background: #fdecec; border-color: #d64545; color: #d64545; }
+.orio-act-btn.active.up { color: #2e9e5b; }
+.orio-act-btn.active.copied { color: #2e9e5b; border-color: #2e9e5b; }
 
 .orio-fb-reasons {
   display: flex;

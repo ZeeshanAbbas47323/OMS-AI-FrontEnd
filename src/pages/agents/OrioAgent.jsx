@@ -53,18 +53,49 @@ const FEEDBACK_REASONS = [
   ['too_slow', 'Too slow'],
 ]
 
-// Copy / thumbs up / thumbs down under an answer. A thumbs-down offers an
-// optional reason; the rating is already saved before the reason is chosen.
-function MessageActions({ content, fb, onCopy, copied, onRate, onReason }) {
+const ICON_PROPS = {
+  width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+  strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true,
+}
+
+const CopyIcon = () => (
+  <svg {...ICON_PROPS}><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg>
+)
+const CheckIcon = () => (
+  <svg {...ICON_PROPS}><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+)
+const ThumbUpIcon = ({ filled }) => (
+  <svg {...ICON_PROPS} fill={filled ? 'currentColor' : 'none'}>
+    <path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3z" />
+    <path d="M7 11l4-7a2 2 0 0 1 2 2v3h5.5a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.3 20H7" />
+  </svg>
+)
+const ThumbDownIcon = ({ filled }) => (
+  <svg {...ICON_PROPS} fill={filled ? 'currentColor' : 'none'}>
+    <path d="M17 13V4h3a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-3z" />
+    <path d="M17 13l-4 7a2 2 0 0 1-2-2v-3H5.5a2 2 0 0 1-2-2.3l1.2-7A2 2 0 0 1 6.7 4H17" />
+  </svg>
+)
+
+// Copy / thumbs up / thumbs down under an answer, icon-only. A thumbs-down
+// offers an optional reason; the rating is already saved before the reason
+// is chosen.
+function MessageActions({ fb, onCopy, copied, onRate, onReason }) {
   return (
     <>
       <span className="orio-msg-actions">
-        <button className={`orio-act-btn ${copied ? 'active' : ''}`} onClick={onCopy}
-                title="Copy this answer">{copied ? '✓ Copied' : '📋 Copy'}</button>
+        <button className={`orio-act-btn ${copied ? 'active copied' : ''}`} onClick={onCopy}
+                title={copied ? 'Copied' : 'Copy'} aria-label="Copy answer">
+          {copied ? <CheckIcon /> : <CopyIcon />}
+        </button>
         <button className={`orio-act-btn ${fb?.rating === 'up' ? 'active up' : ''}`}
-                onClick={() => onRate('up')} title="Good answer" aria-label="Good answer">👍</button>
+                onClick={() => onRate('up')} title="Good answer" aria-label="Good answer">
+          <ThumbUpIcon filled={fb?.rating === 'up'} />
+        </button>
         <button className={`orio-act-btn ${fb?.rating === 'down' ? 'active down' : ''}`}
-                onClick={() => onRate('down')} title="Bad answer" aria-label="Bad answer">👎</button>
+                onClick={() => onRate('down')} title="Bad answer" aria-label="Bad answer">
+          <ThumbDownIcon filled={fb?.rating === 'down'} />
+        </button>
       </span>
       {fb?.rating === 'down' && (
         <div className="orio-fb-reasons">
@@ -2748,7 +2779,6 @@ export default function OrioAgent() {
                 {msg.timestamp && new Date(msg.timestamp).toLocaleTimeString()}
                 {msg.role === 'agent' && !msg.isError && msg.content && (
                   <MessageActions
-                    content={msg.content}
                     fb={feedbackByMsg[msgIdx]}
                     copied={copiedIdx === msgIdx}
                     onCopy={() => copyAnswer(msgIdx, msg.content)}
