@@ -2358,3 +2358,79 @@ a.action-log-btn {
   border-color: #2e7d32;
   color: #2e7d32;
 }
+
+/* Starter cards on the empty chat */
+.orio-starters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 560px;
+}
+
+.orio-starter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  padding: 12px 14px;
+  border: 1px solid var(--border, #d0d7e6);
+  border-radius: 12px;
+  background: var(--bg-card, #fff);
+  color: var(--text-primary, #333);
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+.orio-starter:hover {
+  border-color: var(--primary, #4a6cf7);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 108, 247, 0.12);
+}
+
+.orio-starter-icon { font-size: 20px; }
+.orio-starter-title { font-size: 14px; font-weight: 600; }
+.orio-starter-detail { font-size: 12px; color: var(--text-secondary, #666); }
+
+.example-list span.example-click { cursor: pointer; }
+.example-list span.example-click:hover { outline: 1px solid var(--primary, #4a6cf7); }
+
+/* One-tap follow-ups under the latest answer */
+.orio-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.orio-chip {
+  padding: 6px 12px;
+  border: 1px solid var(--border, #d0d7e6);
+  border-radius: 16px;
+  background: var(--surface, #f0f4ff);
+  color: var(--text, #333);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.orio-chip:hover {
+  border-color: var(--primary, #4a6cf7);
+  background: var(--bg-card, #fff);
+}
+
+.orio-elapsed {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+}
+
+[data-theme="dark"] .orio-starter,
+[data-theme="dark"] .orio-chip {
+  background: var(--bg-card, #2a2a2a);
+  color: var(--text-primary, #eee);
+}

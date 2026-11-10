@@ -21,6 +21,31 @@ function ThinkingStep({ step, message, status }) {
   )
 }
 
+// Seconds since a turn started. A long answer that shows a ticking clock
+// and its current step feels like work in progress; the same wait on a
+// frozen screen feels like a hang.
+function ElapsedTimer() {
+  const [seconds, setSeconds] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setSeconds(s => s + 1), 1000)
+    return () => clearInterval(id)
+  }, [])
+  if (seconds < 2) return null
+  return <span className="orio-elapsed">⏱ {seconds}s</span>
+}
+
+// One-tap follow-ups under the latest answer.
+function SuggestionChips({ suggestions, onPick }) {
+  if (!suggestions || suggestions.length === 0) return null
+  return (
+    <div className="orio-chips">
+      {suggestions.map((c, i) => (
+        <button key={i} className="orio-chip" onClick={() => onPick(c.prompt)}>{c.label}</button>
+      ))}
+    </div>
+  )
+}
+
 function ChainProgress({ plan, currentStep, total }) {
   if (!plan || plan.length === 0) return null
   return (
@@ -1912,6 +1937,9 @@ export default function OrioAgent() {
     }
   })
   const [showModelPicker, setShowModelPicker] = useState(false)
+  // Cards on the empty chat, built from this account's own numbers. Absent
+  // until loaded (or if it fails) — the static examples then stay.
+  const [starters, setStarters] = useState(null)
   const autonomousRef = useRef(null)
   const wsRef = useRef(null)
   const chatEndRef = useRef(null)
@@ -1922,6 +1950,26 @@ export default function OrioAgent() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, thinkingSteps, currentTools, streamingText])
+
+  // The server answers with whatever is ready and says `loading` while the
+  // slower figures finish in the background; one re-ask a few seconds later
+  // picks them up without making the first paint wait.
+  useEffect(() => {
+    let cancelled = false
+    let retry = null
+    const load = (again) => {
+      fetch(`${API_BASE}/api/agent/starters`)
+        .then(r => (r.ok ? r.json() : null))
+        .then(d => {
+          if (cancelled) return
+          setStarters(d && d.cards && d.cards.length ? d.cards : null)
+          if (d && d.loading && again) retry = setTimeout(() => load(false), 7000)
+        })
+        .catch(() => { if (!cancelled) setStarters(null) })
+    }
+    load(true)
+    return () => { cancelled = true; clearTimeout(retry) }
+  }, [])
 
   useEffect(() => {
     fetch(`${API_BASE}/api/models`)
@@ -2169,6 +2217,7 @@ export default function OrioAgent() {
                   learnedFrom: data.learned_from || null,
                   webSources: data.web_sources || null,
                   assignedAgent: data.assigned_agent || null,
+                  suggestions: data.suggestions || null,
                   timestamp: new Date(),
                 }])
                 return null
@@ -2518,15 +2567,27 @@ export default function OrioAgent() {
             <div className="orio-empty-icon">🤖</div>
             <h2>Orio AI Assistant</h2>
             <p>I'm your intelligent assistant — ask me anything! I can help with general questions, OMS operations, orders, reports, and more.</p>
-            <div className="orio-examples">
-              <p className="example-label">Try something like:</p>
-              <div className="example-list">
-                <span>"Find all stuck orders older than 30 days"</span>
-                <span>"Analyze order 424521"</span>
-                <span>"Generate a daily report"</span>
-                <span>"Draft a reply for order TRK-9941"</span>
+            {starters ? (
+              <div className="orio-starters">
+                {starters.map((c, i) => (
+                  <button key={i} className="orio-starter" onClick={() => sendPrompt(c.prompt)}>
+                    <span className="orio-starter-icon">{c.icon}</span>
+                    <span className="orio-starter-title">{c.title}</span>
+                    <span className="orio-starter-detail">{c.detail}</span>
+                  </button>
+                ))}
               </div>
-            </div>
+            ) : (
+              <div className="orio-examples">
+                <p className="example-label">Try something like:</p>
+                <div className="example-list">
+                  {['Find all stuck orders older than 30 days', 'Analyze order 424521',
+                    'Generate a daily report', 'Draft a reply for order TRK-9941'].map(q => (
+                    <span key={q} className="example-click" onClick={() => sendPrompt(q)}>"{q}"</span>
+                  ))}
+                </div>
+              </div>
+            )}
             {memoryContext.length > 0 && (
               <div className="memory-indicator">
                 <span className="memory-icon">🧠</span>
@@ -2609,6 +2670,10 @@ export default function OrioAgent() {
                 <AgentBadge assignedAgent={msg.assignedAgent} />
               )}
 
+              {msgIdx === messages.length - 1 && !isProcessing && (
+                <SuggestionChips suggestions={msg.suggestions} onPick={sendPrompt} />
+              )}
+
               <div className="orio-message-time">
                 {msg.timestamp && new Date(msg.timestamp).toLocaleTimeString()}
                 {msg.role === 'agent' && msg.content && (
@@ -2636,6 +2701,7 @@ export default function OrioAgent() {
                 {thinkingSteps.map((step, i) => (
                   <ThinkingStep key={i} {...step} />
                 ))}
+                <ElapsedTimer />
               </div>
               <div className={`orio-tool-cards ${currentTools.filter(t => t.status === 'done').length > 1 ? 'chained' : ''}`}>
                 {currentTools.filter(t => t.status === 'done').map((t, i, arr) => (
