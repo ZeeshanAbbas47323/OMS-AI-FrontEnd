@@ -46,6 +46,40 @@ function SuggestionChips({ suggestions, onPick }) {
   )
 }
 
+const FEEDBACK_REASONS = [
+  ['wrong_numbers', 'Wrong numbers'],
+  ['misunderstood', "Didn't understand me"],
+  ['incomplete', 'Incomplete'],
+  ['too_slow', 'Too slow'],
+]
+
+// Copy / thumbs up / thumbs down under an answer. A thumbs-down offers an
+// optional reason; the rating is already saved before the reason is chosen.
+function MessageActions({ content, fb, onCopy, copied, onRate, onReason }) {
+  return (
+    <>
+      <span className="orio-msg-actions">
+        <button className={`orio-act-btn ${copied ? 'active' : ''}`} onClick={onCopy}
+                title="Copy this answer">{copied ? '✓ Copied' : '📋 Copy'}</button>
+        <button className={`orio-act-btn ${fb?.rating === 'up' ? 'active up' : ''}`}
+                onClick={() => onRate('up')} title="Good answer" aria-label="Good answer">👍</button>
+        <button className={`orio-act-btn ${fb?.rating === 'down' ? 'active down' : ''}`}
+                onClick={() => onRate('down')} title="Bad answer" aria-label="Bad answer">👎</button>
+      </span>
+      {fb?.rating === 'down' && (
+        <div className="orio-fb-reasons">
+          <span className="orio-fb-thanks">Sorry about that. What went wrong?</span>
+          {FEEDBACK_REASONS.map(([key, label]) => (
+            <button key={key} className={`orio-chip ${fb.reason === key ? 'selected' : ''}`}
+                    onClick={() => onReason(key)}>{label}</button>
+          ))}
+        </div>
+      )}
+      {fb?.rating === 'up' && <span className="orio-fb-thanks inline">Thanks!</span>}
+    </>
+  )
+}
+
 function ChainProgress({ plan, currentStep, total }) {
   if (!plan || plan.length === 0) return null
   return (
@@ -1940,6 +1974,11 @@ export default function OrioAgent() {
   // Cards on the empty chat, built from this account's own numbers. Absent
   // until loaded (or if it fails) — the static examples then stay.
   const [starters, setStarters] = useState(null)
+  // Per-answer thumbs rating ({[msgIdx]: {rating, reason}}) and which
+  // answer was just copied. Kept in memory: the rating itself is stored
+  // server-side, this only drives the buttons' highlight.
+  const [feedbackByMsg, setFeedbackByMsg] = useState({})
+  const [copiedIdx, setCopiedIdx] = useState(null)
   const autonomousRef = useRef(null)
   const wsRef = useRef(null)
   const chatEndRef = useRef(null)
@@ -2268,6 +2307,37 @@ export default function OrioAgent() {
     ws.onerror = connectionLost
 
     return ws
+  }
+
+  const copyAnswer = async (idx, text) => {
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch {
+      const ta = document.createElement('textarea')
+      ta.value = text
+      document.body.appendChild(ta)
+      ta.select()
+      try { document.execCommand('copy') } finally { document.body.removeChild(ta) }
+    }
+    setCopiedIdx(idx)
+    setTimeout(() => setCopiedIdx(cur => (cur === idx ? null : cur)), 1500)
+  }
+
+  const sendFeedback = (idx, rating, reason = '') => {
+    const msg = messages[idx]
+    if (!msg) return
+    const question = [...messages.slice(0, idx)].reverse().find(m => m.role === 'user')?.content || ''
+    setFeedbackByMsg(prev => ({ ...prev, [idx]: { rating, reason } }))
+    fetch(`${API_BASE}/api/agent/feedback`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        rating, reason, question,
+        answer: msg.content,
+        conversation_id: conversationRef.current || null,
+        tools: (msg.tools || []).map(t => t.tool),
+      }),
+    }).catch(() => {})
   }
 
   const sendPrompt = (prompt) => {
@@ -2676,6 +2746,16 @@ export default function OrioAgent() {
 
               <div className="orio-message-time">
                 {msg.timestamp && new Date(msg.timestamp).toLocaleTimeString()}
+                {msg.role === 'agent' && !msg.isError && msg.content && (
+                  <MessageActions
+                    content={msg.content}
+                    fb={feedbackByMsg[msgIdx]}
+                    copied={copiedIdx === msgIdx}
+                    onCopy={() => copyAnswer(msgIdx, msg.content)}
+                    onRate={(r) => sendFeedback(msgIdx, r)}
+                    onReason={(reason) => sendFeedback(msgIdx, 'down', reason)}
+                  />
+                )}
                 {msg.role === 'agent' && msg.content && (
                   <button
                     className={`orio-speak-btn ${speakingIdx === msgIdx ? 'speaking' : ''}`}
